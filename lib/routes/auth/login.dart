@@ -58,59 +58,55 @@ class _LoginRouteState extends State<LoginRoute> {
 
     context.read<LoginFormCubit>().setLoading(true);
 
-    context.push("/auth/verify-code");
+    try {
+      final authenticationRepository = context.read<AuthenticationRepository>();
+      final loginFormState = context.read<LoginFormCubit>().state;
 
-    context.read<LoginFormCubit>().setLoading(false);
+      await authenticationRepository.phoneSignIn(
+          "${loginFormState.phoneCode.dialCode} ${loginFormState.currentInput}",
+          codeSent: (verificationId, resendToken) async {
+        context
+            .read<PhoneVerificationCubit>()
+            .setVerification(PhoneVerificationStateSent(
+              verificationId: verificationId,
+              resendToken: resendToken,
+            ));
 
-    // try {
-    //   final authenticationRepository = context.read<AuthenticationRepository>();
-    //   final loginFormState = context.read<LoginFormCubit>().state;
+        context.push("/auth/verify-code");
 
-    //   await authenticationRepository.phoneSignIn(
-    //       "${loginFormState.phoneCode.dialCode} ${loginFormState.currentInput}",
-    //       codeSent: (verificationId, resendToken) async {
-    //     context
-    //         .read<PhoneVerificationCubit>()
-    //         .setVerification(PhoneVerificationStateSent(
-    //           verificationId: verificationId,
-    //           resendToken: resendToken,
-    //         ));
+        context.read<LoginFormCubit>().setLoading(false);
+      }, verificationFailed: (error) {
+        if (scaffoldKey.currentContext != null) {
+          SnackBar snackBar = SnackBar(
+            content: Text(error.message ??
+                "An error occured with the phone authentication"),
+          );
 
-    //     context.push("/auth/verify-code");
+          ScaffoldMessenger.of(scaffoldKey.currentContext!)
+              .showSnackBar(snackBar);
+        }
 
-    //     context.read<LoginFormCubit>().setLoading(false);
-    //   }, verificationFailed: (error) {
-    //     if (scaffoldKey.currentContext != null) {
-    //       SnackBar snackBar = SnackBar(
-    //         content: Text(error.message ??
-    //             "An error occured with the phone authentication"),
-    //       );
+        context.read<LoginFormCubit>().setLoading(false);
+      });
+    } on PhoneAuthError catch (error) {
+      if (scaffoldKey.currentContext != null) {
+        const SnackBar snackBar = SnackBar(
+          content: Text("An error occured with the phone authentication"),
+        );
 
-    //       ScaffoldMessenger.of(scaffoldKey.currentContext!)
-    //           .showSnackBar(snackBar);
-    //     }
+        ScaffoldMessenger.of(scaffoldKey.currentContext!)
+            .showSnackBar(snackBar);
+      }
+    } on Exception catch (error) {
+      if (scaffoldKey.currentContext != null) {
+        const SnackBar snackBar = SnackBar(
+          content: Text("Unknown error occured"),
+        );
 
-    //     context.read<LoginFormCubit>().setLoading(false);
-    //   });
-    // } on PhoneAuthError catch (error) {
-    //   if (scaffoldKey.currentContext != null) {
-    //     const SnackBar snackBar = SnackBar(
-    //       content: Text("An error occured with the phone authentication"),
-    //     );
-
-    //     ScaffoldMessenger.of(scaffoldKey.currentContext!)
-    //         .showSnackBar(snackBar);
-    //   }
-    // } on Exception catch (error) {
-    //   if (scaffoldKey.currentContext != null) {
-    //     const SnackBar snackBar = SnackBar(
-    //       content: Text("Unknown error occured"),
-    //     );
-
-    //     ScaffoldMessenger.of(scaffoldKey.currentContext!)
-    //         .showSnackBar(snackBar);
-    //   }
-    // }
+        ScaffoldMessenger.of(scaffoldKey.currentContext!)
+            .showSnackBar(snackBar);
+      }
+    }
   }
 
   @override
@@ -199,7 +195,17 @@ class _LoginRouteState extends State<LoginRoute> {
                       controller: state.phoneNumberEditingController,
                       style: theme.textTheme.titleMedium,
                       enabled: !loginFormState.loading,
+                      autofillHints: const [
+                        AutofillHints.telephoneNumber,
+                      ],
                       decoration: InputDecoration(
+                        prefix: Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: Text(
+                            loginFormState.phoneCode.dialCode,
+                            style: theme.textTheme.titleMedium,
+                          ),
+                        ),
                         hintText: "123-456-7890",
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(4),

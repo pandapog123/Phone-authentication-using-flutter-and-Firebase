@@ -8,6 +8,7 @@ import 'package:phone_auth_firebase/cubit/phone_verification/phone_verification_
 import 'package:phone_auth_firebase/routes/auth/login.dart';
 import 'package:phone_auth_firebase/routes/auth/main.dart';
 import 'package:phone_auth_firebase/routes/auth/verify_code.dart';
+import 'package:phone_auth_firebase/routes/home.dart';
 import 'package:phone_auth_firebase/utils/country_phone_codes.dart';
 import 'package:phone_number/phone_number.dart';
 
@@ -45,7 +46,7 @@ class RootApp extends StatelessWidget {
     final userState = context.watch<AuthBloc>().state;
 
     final router = GoRouter(
-      initialLocation: "/auth/verify-code",
+      initialLocation: "/",
       routes: [
         GoRoute(
           path: "/auth",
@@ -141,7 +142,7 @@ class RootApp extends StatelessWidget {
           path: "/",
           pageBuilder: (context, state) {
             return CustomTransitionPage(
-              child: const SafeArea(child: Text("test")),
+              child: const HomeRoute(),
               transitionDuration: Durations.short4,
               transitionsBuilder:
                   (context, animation, secondaryAnimation, child) {

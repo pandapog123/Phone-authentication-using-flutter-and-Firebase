@@ -10,6 +10,7 @@
 - [Phone number package documentation](https://pub.dev/packages/phone_number)
 - [Firebase phone number authentication documentation](https://firebase.google.com/docs/auth/flutter/phone-auth)
 - [Firebase iOS phone number auth docs](https://firebase.google.com/docs/auth/ios/phone-auth)
+- [Authenticating your clients](https://developers.google.com/android/guides/client-auth)
 
 ## Steps to duplicate
 

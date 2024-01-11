@@ -44,9 +44,3 @@ app.*.map.json
 
 # Firebase
 /lib/firebase_options.dart
-
-# iOS
-/ios
-
-# Android
-/android
